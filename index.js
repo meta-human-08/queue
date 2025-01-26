@@ -44,18 +44,20 @@ function generateHeatmapPattern(name, startDate, repoDir) {
 }
 
 const connection = {
-  host: "oregon-redis.render.com",
-  port: 6379,
-  password: "xm2XIFfgdHUL4mP2T9w9FQTnnyKXjSPC",
+  host: "roundhouse.proxy.rlwy.net",
+  port: 35230,
+  password: "HwRdLDPptlShKlrIzTLfHJdLjaoUqLnZ",
   tls: {}, // Secure connection for rediss://
-  username: "red-cu4038dumphs73dd6qp0",
+  username: "default",
 };
+
 // Worker to process queue tasks
 const worker = new Worker(
   "gitQueue",
   async (job) => {
     const { name, email, text, access_token } = job.data;
-    console.log(`Processing job for ${name} <${email}>`);
+    console.log(`Processing job for ${name} <${email}> : <${text}>`);
+    return {}
 
     const uniqueId = uuidv4();
     const startDate = "2024-01-07";
@@ -76,7 +78,7 @@ const worker = new Worker(
 
       generateHeatmapPattern(text, startDate, repoDir);
 
-    //   const repoName = `generated-1`;
+      //   const repoName = `generated-1`;
       const remoteUrl = `https://${access_token}@github.com/${name}/${repoDir}.git`;
 
       // Push to GitHub
@@ -101,7 +103,7 @@ const worker = new Worker(
       }
     }
   },
-  { connection }
+  { connection: Redis.REDIS_URL }
 );
 
 worker.on("completed", (job, result) => {
